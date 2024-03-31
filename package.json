@@ -8,7 +8,10 @@
 		"start": "wrangler dev"
 	},
 	"dependencies": {
-		"@cloudflare/itty-router-openapi": "^1.0.1"
+		"@cloudflare/itty-router-openapi": "^1.0.1",
+		"@neondatabase/serverless": "^0.9.0",
+		"drizzle-orm": "^0.30.6",
+		"hono": "^4.1.7"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20240329.0",

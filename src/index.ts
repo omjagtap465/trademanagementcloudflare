@@ -1,29 +1,24 @@
-import { OpenAPIRouter } from "@cloudflare/itty-router-openapi";
-import { TaskCreate } from "./endpoints/taskCreate";
-import { TaskDelete } from "./endpoints/taskDelete";
-import { TaskFetch } from "./endpoints/taskFetch";
-import { TaskList } from "./endpoints/taskList";
+import { Hono } from "hono";
+import { registerController } from "endpoints/user_controller";
+import { Pool } from "@neondatabase/serverless";
 
-export const router = OpenAPIRouter({
-	docs_url: "/",
+interface Env {
+  DATABASE_URL: string;
+}
+const app = new Hono();
+const pool = new Pool({
+  connectionString:
+    "postgresql://application_owner:ZWI8GVOo7Ybh@ep-broad-butterfly-a1tk0dfl.ap-southeast-1.aws.neon.tech/application?sslmode=require",
 });
+app.post("/register", registerController);
+const fetch = async (request: Request, env: Env, ctx: ExecutionContext) => {
+  const client = await pool.connect();
+  await client.release();
 
-router.get("/api/tasks/", TaskList);
-router.post("/api/tasks/", TaskCreate);
-router.get("/api/tasks/:taskSlug/", TaskFetch);
-router.delete("/api/tasks/:taskSlug/", TaskDelete);
+  const response = app.request(request);
 
-// 404 for everything else
-router.all("*", () =>
-	Response.json(
-		{
-			success: false,
-			error: "Route not found",
-		},
-		{ status: 404 }
-	)
-);
-
+  return response;
+};
 export default {
-	fetch: router.handle,
+  fetch,
 };
