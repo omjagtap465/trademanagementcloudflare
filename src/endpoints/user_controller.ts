@@ -1,4 +1,4 @@
-import { decode, sign, verify } from "hono/jwt";
+import { sign } from "hono/jwt";
 import { jwt } from "hono/jwt";
 import { Client } from "@neondatabase/serverless";
 // import { sql } from "../index";
@@ -21,7 +21,7 @@ const registerController = async (c) => {
       password: password,
       exp: Math.floor(Date.now() / 1000) + 60 * 5, // Token expires in 5 minutes
     };
-    const secret = "mySecretKey";
+    const secret = "secret";
     const token = await sign(payload, secret);
     return c.json({
       data: {
@@ -32,5 +32,11 @@ const registerController = async (c) => {
     console.log(error);
   }
 };
+const xyzController = async (c) => {
+  console.log(c.req.payload);
+  return c.json({
+    data: c.req.payload,
+  });
+};
 
-export { registerController };
+export { registerController, xyzController };
