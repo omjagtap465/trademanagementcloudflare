@@ -4,7 +4,8 @@ const verifyToken = async (c, next) => {
 
   const bearerAuthorizationHeader = c.req.header("authorization");
 
-  const tokenToVerifyAndDecode = bearerAuthorizationHeader.split("")[1];
+  const tokenToVerifyAndDecode = bearerAuthorizationHeader.split(" ")[1];
+
   const secretKey = "secret";
 
   const decodedPayload = await verify(tokenToVerifyAndDecode, secretKey);

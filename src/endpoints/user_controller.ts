@@ -1,25 +1,31 @@
 import { sign } from "hono/jwt";
-import { jwt } from "hono/jwt";
 import { Client } from "@neondatabase/serverless";
-// import { sql } from "../index";
 const client = new Client(
   "postgresql://application_owner:ZWI8GVOo7Ybh@ep-broad-butterfly-a1tk0dfl.ap-southeast-1.aws.neon.tech/application?sslmode=require"
 );
 
 const registerController = async (c) => {
-  const body = await c.req.json();
-  const { username, email, password } = body;
+  console.log(client);
+
   try {
-    await client.connect();
+    const body = await c.req.json();
+    const { username, email, password } = body;
+    // await client.connect();
     const result = await client.query(
       `INSERT INTO users (username, email, password)
         VALUES ($1, $2, $3)`,
       [username, email, password]
     );
+    const userDetails = await client.query(
+      "SELECT * FROM users WHERE username = $1",
+      [username]
+    );
+    console.log(userDetails);
     const payload = {
+      result: result,
       username: username,
       password: password,
-      exp: Math.floor(Date.now() / 1000) + 60 * 5, // Token expires in 5 minutes
+      exp: Math.floor(Date.now() / 1000) + 60 * 6000,
     };
     const secret = "secret";
     const token = await sign(payload, secret);
@@ -32,11 +38,33 @@ const registerController = async (c) => {
     console.log(error);
   }
 };
-const xyzController = async (c) => {
-  console.log(c.req.payload);
-  return c.json({
-    data: c.req.payload,
-  });
+const loginController = async (c) => {
+  try {
+    // await client.connect();
+    const body = await c.req.json();
+    const { username, email, password } = body;
+    // await client.connect();
+    console.log(username);
+    const userDetails = await client.query(
+      "SELECT * FROM users WHERE username = $1",
+      [username]
+    );
+    console.log(userDetails);
+    const payload = {
+      username: username,
+      password: password,
+      exp: Math.floor(Date.now() / 1000) + 60 * 6000,
+    };
+    const secret = "secret";
+    const token = await sign(payload, secret);
+    return c.json({
+      data: {
+        token: token,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-export { registerController, xyzController };
+export { registerController, loginController };
